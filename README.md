@@ -38,7 +38,7 @@ Run
 
 Connect serial device, then
 
-    % ./serial-socket-gateway
+    % ./serial-socket-gateway /dev/tty.your-usbdevice
 
 
 Use
