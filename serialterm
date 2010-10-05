@@ -6,7 +6,7 @@ require 'rubygems'
 require 'eventmachine'
 
 if ARGV.size < 1
-  puts 'serialterm /dev/tty/tty-usbdevice'
+  puts 'serialterm /dev/tty.your-usbdevice'
   exit 1
 end
 

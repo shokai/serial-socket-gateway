@@ -4,10 +4,9 @@ require 'serialport'
 require 'rubygems'
 require 'eventmachine'
 require 'socket'
-$KCODE = 'u'
 
 if ARGV.size < 1
-  puts 'serial-socket-gateway /dev/tty/tty-usbdevice'
+  puts 'serial-socket-gateway /dev/tty.your-usbdevice'
   exit 1
 end
 
