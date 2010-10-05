@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 require 'serialport'
 require 'rubygems'
@@ -6,7 +7,7 @@ require 'socket'
 $KCODE = 'u'
 
 if ARGV.size < 1
-  puts 'ruby serial-socket-gateway.rb /dev/tty/tty-usbdevice'
+  puts 'serial-socket-gateway /dev/tty/tty-usbdevice'
   exit 1
 end
 
