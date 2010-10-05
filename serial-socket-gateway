@@ -28,6 +28,7 @@ EventMachine::run do
   EventMachine::defer do
     loop do
       data = sp.gets
+      next unless data
       serial_to_clients << data
       puts data
     end
@@ -52,12 +53,13 @@ EventMachine::run do
             c.puts data
           rescue => e
             errors << c
-            STDERR.puts e
+            STDERR.puts "--- #{e}"
           end
         }
         errors.each{|c|
           clients.delete(c)
           c.close
+          puts "--- 1 socket client closed"
         }
       end
     end
@@ -72,7 +74,7 @@ EventMachine::run do
         begin
           c.puts ''
         rescue => e
-          STDERR.puts e
+          STDERR.puts "--- #{e}"
           errors << c
         end
       }
@@ -92,7 +94,8 @@ EventMachine::run do
       puts "--- new clients : #{clients.size}"
       EventMachine::defer do
         loop do
-          puts line = c.gets # ちゃんとスコープ別れるのだろうか?
+          line = c.gets
+          next unless line 
           sp.puts line rescue exit 1
         end
       end
