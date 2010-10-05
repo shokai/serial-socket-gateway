@@ -58,6 +58,6 @@ see "samples" directory.
     ## write to serial device
     % s.puts "abc abc"
 
-    ## receive
+    ## read
     % puts s.gets
  
