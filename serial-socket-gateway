@@ -89,10 +89,9 @@ EventMachine::run do
       loop do
       c = sock.accept
       clients << c
-      puts "--- clients : #{clients.size}"
-      Thread.start(c) do |c|
-          loop do
-          #EventMachine::run do # socket -> serial
+      puts "--- new clients : #{clients.size}"
+      EventMachine::defer do
+        loop do
           puts line = c.gets # ちゃんとスコープ別れるのだろうか?
           sp.puts line rescue exit 1
         end
