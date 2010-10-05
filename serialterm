@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+# simple serial terminal
+require 'serialport'
+require 'rubygems'
+require 'eventmachine'
+
+if ARGV.size < 1
+  puts 'serialterm /dev/tty/tty-usbdevice'
+  exit 1
+end
+
+sp = SerialPort.new(ARGV.shift, 9600, 8, 1, SerialPort::NONE) # 9600bps, 8bit, ストップビット1, パリティ無し
+
+EventMachine::run do
+
+  EventMachine::defer do
+    loop do
+      line = sp.gets rescue exit(1)
+      puts line
+    end
+  end
+  
+  EventMachine::defer do
+    loop do
+      line = gets
+      sp.puts line rescue exit(1)
+    end
+  end
+
+end
+
+sp.close
+
