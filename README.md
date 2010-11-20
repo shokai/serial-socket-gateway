@@ -29,7 +29,7 @@ for Mac OSX and Ubuntu 9.04, 10.04
     % make
     % sudo make install
 
-for Windows (ActiveScriptRuby), download and extract zip http://rubyforge.org/tracker/download.php/61/321/9924/1800/ruby-serialport-0.6.0-mswin32-gem.zip
+for Windows (ActiveScriptRuby), download and decompress zip http://rubyforge.org/tracker/download.php/61/321/9924/1800/ruby-serialport-0.6.0-mswin32-gem.zip
 
     % gem install pkg/serialport-0.6.0-mswin32.gem
 
