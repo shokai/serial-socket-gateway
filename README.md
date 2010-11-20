@@ -47,6 +47,10 @@ Connect serial device, then
 
     % ./serial-socket-gateway /dev/tty.your-usbdevice
 
+or
+
+    % ./serial-socket-gateway COM1
+
 
 Use
 ===
