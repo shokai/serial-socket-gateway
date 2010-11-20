@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 begin
   require 'serialport' # system gem
+rescue => e
+  STDERR.puts e
 end
 require 'rubygems'
 require 'serialport' # ruby gem
