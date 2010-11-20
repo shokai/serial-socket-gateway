@@ -11,7 +11,7 @@ serial device (/dev/tty.*.usbserial) <---> TCP Socket
 Dependencies
 ============
 * ruby-serialport (build from source code)
-* eventmachine (rubygem)
+* eventmachine, ArgsParser (rubygem)
 * your serial device (arduino, mbed ...)
 
 
