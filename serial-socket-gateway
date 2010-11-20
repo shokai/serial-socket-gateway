@@ -7,9 +7,26 @@ end
 require 'rubygems'
 require 'serialport' # ruby gem
 require 'eventmachine'
+require 'ArgsParser'
 require 'socket'
 
-if ARGV.size < 1
+parser = ArgsParser.parser
+parser.bind(:help, :h, 'show help')
+parser.comment(:bps, 'default : 9600')
+parser.comment(:bit, 'default : 8')
+parser.comment(:stopbit, 'default : 1')
+parser.comment(:parity, 'default : 0')
+parser.comment(:port, 'TCP Port - default : 8782')
+serial_device, params = parser.parse(ARGV)
+
+params[:bps] = 9600 unless params[:bps]
+params[:bit] = 8 unless params[:bit]
+params[:stopbit] = 1 unless params[:stopbit]
+params[:parity] = 0 unless params[:parity]
+params[:port] = 8782 unless params[:port]
+
+if !serial_device or parser.has_option(:help)
+  puts parser.help
   if RUBY_PLATFORM =~ /mswin|mingw|cygwin|bccwin/
     puts 'e.g. serial-socket-gateway COM1'
   else
@@ -18,17 +35,21 @@ if ARGV.size < 1
   exit 1
 end
 
-TCP_PORT = 8782
+begin
+  sock = TCPServer.open params[:port].to_i
+  puts "starting server - TCP Port #{params[:port].to_i}"
+rescue => e
+  STDERR.puts 'cannot oopen tcp port!!'
+  STDERR.puts e
+  exit 1
+end
 
-sock = TCPServer.open TCP_PORT
-p sock.addr
 
 clients = Array.new
 serial_to_clients = Array.new
 
-serial_device = ARGV.shift
 begin
-  sp = SerialPort.new(serial_device, 9600, 8, 1, SerialPort::NONE) # 9600bps, 8bit, stopbit 1, parity none
+  sp = SerialPort.new(serial_device, params[:bps].to_i, params[:bit].to_i, params[:stopbit].to_i, params[:parity].to_i) # 9600bps, 8bit, stopbit 1, parity none
 rescue => e
   STDERR.puts 'cannot open serialport!!'
   STDERR.puts e

@@ -34,10 +34,10 @@ for Windows (ActiveScriptRuby), download and extract zip http://rubyforge.org/tr
     % gem install pkg/serialport-0.6.0-mswin32.gem
 
 
-Install eventmachine
---------------------
+Install gems
+------------
 
-    % gem install eventmachine
+    % gem install eventmachine ArgsParser
 
 
 Run
