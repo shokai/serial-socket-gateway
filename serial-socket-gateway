@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 begin
   require 'serialport' # system gem
-rescue => e
+rescue LoadError => e
   STDERR.puts e
 end
 require 'rubygems'
