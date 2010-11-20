@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 begin
   require 'serialport' # system gem
-rescue
+end
 require 'rubygems'
 require 'serialport' # ruby gem
 require 'eventmachine'
