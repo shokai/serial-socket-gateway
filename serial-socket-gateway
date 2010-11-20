@@ -1,12 +1,18 @@
 #!/usr/bin/env ruby
-# -*- coding: utf-8 -*-
-require 'serialport'
+begin
+  require 'serialport' # system gem
+rescue
 require 'rubygems'
+require 'serialport' # ruby gem
 require 'eventmachine'
 require 'socket'
 
 if ARGV.size < 1
-  puts 'serial-socket-gateway /dev/tty.your-usbdevice'
+  if RUBY_PLATFORM =~ /mswin|mingw|cygwin|bccwin/
+    puts 'serial-socket-gateway COM1'
+  else
+    puts 'serial-socket-gateway /dev/tty.your-usbdevice'
+  end
   exit 1
 end
 
@@ -19,7 +25,7 @@ clients = Array.new
 serial_to_clients = Array.new
 
 serial_device = ARGV.shift
-sp = SerialPort.new(serial_device, 9600, 8, 1, SerialPort::NONE) # 9600bps, 8bit, ストップビット1, パリティ無し
+sp = SerialPort.new(serial_device, 9600, 8, 1, SerialPort::NONE) # 9600bps, 8bit, stopbit 1, parity none
 
 
 EventMachine::run do
