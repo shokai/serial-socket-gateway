@@ -2,7 +2,7 @@
 begin
   require 'serialport' # system gem
 rescue LoadError => e
-  STDERR.puts e
+  STDERR.puts 'cannot load serialport from system, loading rubygems...'
 end
 require 'rubygems'
 require 'serialport' # ruby gem
@@ -11,9 +11,9 @@ require 'socket'
 
 if ARGV.size < 1
   if RUBY_PLATFORM =~ /mswin|mingw|cygwin|bccwin/
-    puts 'serial-socket-gateway COM1'
+    puts 'e.g. serial-socket-gateway COM1'
   else
-    puts 'serial-socket-gateway /dev/tty.your-usbdevice'
+    puts 'e.g. serial-socket-gateway /dev/tty.your-usbdevice'
   end
   exit 1
 end
@@ -27,7 +27,13 @@ clients = Array.new
 serial_to_clients = Array.new
 
 serial_device = ARGV.shift
-sp = SerialPort.new(serial_device, 9600, 8, 1, SerialPort::NONE) # 9600bps, 8bit, stopbit 1, parity none
+begin
+  sp = SerialPort.new(serial_device, 9600, 8, 1, SerialPort::NONE) # 9600bps, 8bit, stopbit 1, parity none
+rescue => e
+  STDERR.puts 'cannot open serialport!!'
+  STDERR.puts e
+  exit 1
+end
 
 
 EventMachine::run do
