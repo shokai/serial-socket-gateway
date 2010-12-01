@@ -17,6 +17,7 @@ parser.comment(:bit, 'default : 8')
 parser.comment(:stopbit, 'default : 1')
 parser.comment(:parity, 'default : 0')
 parser.comment(:port, 'TCP Port - default : 8782')
+parser.comment(:serial_out_interval, 'default : 0 (sec)')
 serial_device, params = parser.parse(ARGV)
 
 params[:bps] = 9600 unless params[:bps]
@@ -24,6 +25,7 @@ params[:bit] = 8 unless params[:bit]
 params[:stopbit] = 1 unless params[:stopbit]
 params[:parity] = 0 unless params[:parity]
 params[:port] = 8782 unless params[:port]
+params[:serial_out_interval] = 0 unless params[:serial_out_interval]
 
 if !serial_device or parser.has_option(:help)
   puts parser.help
@@ -47,6 +49,7 @@ end
 
 clients = Array.new
 serial_to_clients = Array.new
+clients_to_serial = Array.new
 
 begin
   sp = SerialPort.new(serial_device, params[:bps].to_i, params[:bit].to_i, params[:stopbit].to_i, params[:parity].to_i) # 9600bps, 8bit, stopbit 1, parity none
@@ -99,6 +102,20 @@ EventMachine::run do
       end
     end
   end
+
+
+  # clients -> serial
+  EventMachine::defer do
+    loop do
+      while clients_to_serial.size > 0 do
+        line = clients_to_serial.shift
+        puts "(socket) #{line}"
+        sp.puts line rescue exit 1
+        sleep params[:serial_out_interval].to_f
+      end
+      sleep 0.1
+    end
+  end
   
   
   # check clients connection
@@ -130,13 +147,13 @@ EventMachine::run do
       EventMachine::defer do
         loop do
           line = c.gets
-          next unless line 
-          sp.puts line rescue exit 1
+          next unless line
+          clients_to_serial << line
         end
       end
     end
   end
-  
+
 end
 
 sp.close
