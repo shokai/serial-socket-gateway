@@ -4,7 +4,6 @@ gem 'serialport','>=1.0.4'
 require 'serialport'
 require 'eventmachine'
 require 'ArgsParser'
-require 'socket'
 
 parser = ArgsParser.parser
 parser.bind(:help, :h, 'show help')
@@ -27,122 +26,53 @@ if !serial_device or parser.has_option(:help)
 end
 
 begin
-  sock = TCPServer.open params[:port].to_i
-  puts "starting server - TCP Port #{params[:port].to_i}"
-rescue => e
-  STDERR.puts 'cannot oopen tcp port!!'
-  STDERR.puts e
-  exit 1
-end
-
-
-clients = Array.new
-serial_to_clients = Array.new
-clients_to_serial = Array.new
-
-begin
-  sp = SerialPort.new(serial_device, params[:bps].to_i, params[:bit].to_i, params[:stopbit].to_i, params[:parity].to_i) # 9600bps, 8bit, stopbit 1, parity none
+  @@sp = SerialPort.new(serial_device, params[:bps].to_i, params[:bit].to_i, params[:stopbit].to_i, params[:parity].to_i)
 rescue => e
   STDERR.puts 'cannot open serialport!!'
   STDERR.puts e
   exit 1
 end
 
+@@channel = EM::Channel.new
 
-EventMachine::run do
-
-  # serial -> STDOUT
-  EventMachine::defer do
-    loop do
-      data = sp.gets
-      next unless data
-      serial_to_clients << data
-      puts data
-    end
+class SerialServer < EM::Connection
+  def post_init
+    @sid = @@channel.subscribe{|data|
+      send_data "#{data}\n"
+    }
+    puts "new client <#{@sid}>"
   end
 
-  # STDIN -> serial
-  EventMachine::defer do
-    loop do
-      line = gets
-      sp.puts line
-    end
-  end
-  
-  # serial -> clients
-  EventMachine::defer do
-    loop do
-      while serial_to_clients.size > 0 do
-        data = serial_to_clients.shift
-        errors = Array.new
-        clients.each{|c|
-          begin
-            c.puts data
-          rescue => e
-            errors << c
-            STDERR.puts "--- #{e}"
-          end
-        }
-        errors.each{|c|
-          clients.delete(c)
-          c.close
-          puts "--- 1 socket client closed"
-        }
-      end
-    end
+  def receive_data data
+    return if data.strip.size < 1
+    puts "<#{@sid}> #{data}"
+    @@sp.puts data
   end
 
-
-  # clients -> serial
-  EventMachine::defer do
-    loop do
-      while clients_to_serial.size > 0 do
-        line = clients_to_serial.shift
-        puts "(socket) #{line}"
-        sp.puts line rescue exit 1
-        sleep params[:serial_out_interval].to_f
-      end
-      sleep 0.1
-    end
+  def unbind
+    puts "close <#{@sid}>"
+    @@channel.unsubscribe @sid
   end
-  
-  
-  # check clients connection
-  EventMachine::defer do
-    loop do
-      errors = Array.new
-      clients.each{|c|
-        begin
-          c.puts ''
-        rescue => e
-          STDERR.puts "--- #{e}"
-          errors << c
-        end
-      }
-      errors.each{|c|
-        clients.delete(c)
-        c.close
-      }
-      sleep 10
-    end
-  end
-  
-  # accept socket clients
-  EventMachine::defer do
-      loop do
-      c = sock.accept
-      clients << c
-      puts "--- new clients : #{clients.size}"
-      EventMachine::defer do
-        loop do
-          line = c.gets
-          next unless line
-          clients_to_serial << line
-        end
-      end
-    end
-  end
-
 end
 
-sp.close
+EM::run do
+  EM::start_server("0.0.0.0", params[:port].to_i, SerialServer)
+  puts "starting server.."
+  puts " => port #{params[:port].to_i}"
+
+  EM::defer do
+    loop do
+      puts data = @@sp.gets.gsub(/[\r\n]/, '')
+      next if !data or data.to_s.size < 1
+      @@channel.push data
+    end
+  end
+
+  EM::defer do
+    loop do
+      line = gets.gsub(/[\r\n]/, '')
+      next if !line or line.to_s.size < 1
+      @@sp.puts line
+    end
+  end
+end
