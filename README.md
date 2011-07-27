@@ -6,7 +6,7 @@ serial device (/dev/tty.*.usbserial) <---> TCP Socket
 * each client can read/write.
 * forwards strings from serial device to all socket clients.
 * split by '\n'
-* testing on Mac, Linux and Windows.
+* testing on Mac and Linux.
 
 Dependencies
 ============
