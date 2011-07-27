@@ -1,17 +1,35 @@
 #!/usr/bin/env ruby
-# -*- coding: utf-8 -*-
 # simple serial terminal
-require 'serialport'
 require 'rubygems'
+gem 'serialport','>=1.0.4'
+require 'serialport'
 require 'eventmachine'
+require 'ArgsParser'
 
-if ARGV.size < 1
-  puts 'serialterm /dev/tty.your-usbdevice'
+parser = ArgsParser.parser
+parser.bind(:help, :h, 'show help')
+parser.comment(:bps, 'bit per second', 9600)
+parser.comment(:bit, 'bit(7-9)', 8)
+parser.comment(:stopbit, 'stopbit', 1)
+parser.comment(:parity, 'parity bit', 0)
+serial_device, params = parser.parse(ARGV)
+
+if !serial_device or parser.has_option(:help)
+  puts parser.help
+  if RUBY_PLATFORM =~ /mswin|mingw|cygwin|bccwin/
+    puts 'e.g. serialterm COM1'
+    puts '     serialterm COM1 -bps 9600 -bit 8 -stopbit 1 -parity 0'
+  else
+  puts 'e.g. serialterm /dev/tty.your-device'
+    puts '     serialterm /dev/tty.your-device -bps 9600 -bit 8 -stopbit 1 -parity 0'
+  end
   exit 1
 end
 
-sp = SerialPort.new(ARGV.shift, 9600, 8, 1, SerialPort::NONE) # 9600bps, 8bit, ストップビット1, パリティ無し
-
+begin
+  sp = SerialPort.new(serial_device, params[:bps].to_i, params[:bit].to_i, params[:stopbit].to_i, params[:parity].to_i) # 9600bps, 8bit, stopbit 1, parity none
+rescue
+end
 EventMachine::run do
 
   EventMachine::defer do
