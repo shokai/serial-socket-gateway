@@ -12,7 +12,6 @@ parser.comment(:bit, 'bit(7-9)', 8)
 parser.comment(:stopbit, 'stopbit', 1)
 parser.comment(:parity, 'parity bit', 0)
 parser.comment(:port, 'TCP Port', 8782)
-parser.comment(:serial_out_interval, 'default : 0 (sec)')
 serial_device, params = parser.parse(ARGV)
 
 if !serial_device or parser.has_option(:help)
