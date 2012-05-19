@@ -1,3 +1,7 @@
+!!OBSOLETED!!
+=============
+use [serialport-server](http://shokai.github.com/serialport-server)
+
 serial socket gateway
 ====================
 serial device (/dev/tty.*.usbserial) <---> TCP Socket
